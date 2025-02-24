@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+    tools{
+        maven 'maven3'
+    }
+    stages{
+        stage('Build Maven'){
+            steps{
+               checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/9182029380/Ust-springsecurity']])
+                bat 'mvn clean install'
+            }
+        }
+        stage('Build and Push Docker Image'){
+            steps{
+                script{
+                    
+                    bat 'docker build -t sharath198/springbootapplication .'
+                    bat 'docker push sharath198/springbootapplication'
+                }
+            }
+        }
+        stage('Deploy with Docker Compose'){
+            steps{
+                script{
+                    bat 'docker-compose down'
+                    bat 'docker-compose up -d'
+                }
+            }
+        }
+    }
+}
